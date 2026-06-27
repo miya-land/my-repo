@@ -10,6 +10,6 @@ jobs:
       - run: echo "success"
         if: ${{ success() }} # 実行されない
       - run: echo "cancelled"
-        if: ${{ cancelled() }}
+        if: ${{ cancelled() }} # 実行されない
       - run: echo "always"
-        if: ${{ always() }}
+        if: ${{ always() }} # 実行される
