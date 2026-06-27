@@ -18,3 +18,28 @@
 - 単一ワークフローでのみ使いたい変数 → 環境変数
 - 複数のワークフローで同じ値を使いたい。機密情報ではない → Variables (Settings → Secrets and Variables から登録)
 - 複数のワークフローで同じ値を使いたい。機密情報である → Secrets (Settings → Secrets and Variables から登録)
+  - run: echo "${PASSWORD:0:1} ${PASSWORD#?}" みたいなログにsecretsを表示させるのは絶対にやめる
+
+### 4
+- 式で利用できるリテラル
+  - null, boolean, number, string
+- 使える式
+  - 論理演算、比較演算、グルーピング、インデックス、プロパティデリファンス
+- 注意
+  - 型が異なる値同士の比較演算は、勝手に値が変換されるので極力を型を揃えて比較する
+  - リテラルを単体でしか使わなければ、ymlの使用箇所で直接書き、複数箇所で使う場合は環境変数として定義する
+  - runの中で式を使う場合は、環境変数に入れてから使う
+    - 式の空白や特殊文字でシェルがバグる原因に
+    - 特に外部からの入力値を参照するケースでインジェクション防御になる
+ダメな例
+```yml
+run: echo "Hello ${{ github.event.inputs.name }}"
+```
+安全な例
+```yml
+# 安全な書き方
+env:
+  USER_NAME: ${{ github.event.inputs.name }} # 式を安全に環境変数に入れる
+run: echo "Hello $USER_NAME" # シェルの変数として安全に呼び出す
+```
+
