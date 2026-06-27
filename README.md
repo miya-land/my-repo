@@ -50,3 +50,7 @@ run: echo "Hello $USER_NAME" # シェルの変数として安全に呼び出す
   - alwarys() : 手前の処理結果に問わず常にtrue
 - 使い所
   - 失敗時のみ通知するというような処理でfailure()が使える
+
+### 6
+- ステップ間のデータ共有
+  - run: で GITHUB_OUTPUT環境変数に入れる
