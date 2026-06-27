@@ -5,7 +5,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: exit 1          # 終了ステータスがゼロ以外なので、エラーが発生する
-      - run: echo "Hello"
+      - run: echo "failure"
         if: ${{ failure() }} # エラーが発生しても、failure関数があるので実行される
       - run: echo "success"
         if: ${{ success() }} # 実行されない
+      - run: echo "cancelled"
+        if: ${{ cancelled() }}
+      - run: echo "always"
+        if: ${{ always() }}
