@@ -1,5 +1,5 @@
 name: Fomat Md 
-on: push
+on: 
   push:
     paths:
       - 'README.md'
