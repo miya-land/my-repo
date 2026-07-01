@@ -1,9 +1,5 @@
 name: Fomat Md 
-on: 
-  push:
-    paths:
-      - 'README.md'
-  workflow_dispatch:
+on: push
 jobs:
   format:
     runs-on: ubuntu-latest
