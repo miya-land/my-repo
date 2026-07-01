@@ -56,7 +56,7 @@ run: echo "Hello $USER_NAME" # シェルの変数として安全に呼び出す
   - run: で GITHUB_OUTPUT環境変数に入れる
 
 ### 7
-- GitHub APIの実行
+- GitHub APIの実行 (ghコマンドのようなGithub CLI)
   - プルリクエストのコメントやラベル付与などができる
 - 実行するには認証が必要
   - GIHUB_TOKEN というクレデンシャルを使う
@@ -88,4 +88,30 @@ run: echo "Hello $USER_NAME" # シェルの変数として安全に呼び出す
     - permissions: を明示的に指定しない場合、ソースコードの読み込みは暗黙的に許可される
       - しかし、permissions: になにかしらの設定が記述されると上記は無効化される。
       - パーミッション記述時は、ソースコードの読み込みにも明示的な許可が必要
+  - 補足
+    - git コマンド: actions/checkout が必要。ファイルをruns-on環境にダウンロードしないといけないから。ファイルに対しての操作コマンドなので、GH_TOKENの環境変数は不要
+    - gh コマンド: GH_TOKENが必要。ファイルに対してではなく、GitHubのシステム(API)に直接命令を出すため、トークンの設定が必要。actions/checkoutは不要
 
+### 8
+- イベントフィルタリング
+  - 種類
+    - paths: 指定したファイルパスのみ
+    - paths-ignore: 指定したファイルパス以外
+    - branches: 指定したブランチのみ
+    - branches-ignore: 指定したブランチ以外
+    - tags: 指定したGit タグのみ
+    - tags-ignore: 指定したGitタグ以外
+  - 注意事項
+    - 通常フィルターとignoreフィルターは同時に使えない
+      - 同時に使いたい場合は、globを使う
+  - 複数指定した場合はAND条件
+- アクティビティタイプ
+  - イベントの種類に応じた制御が可能
+  - イベントごとに使用可能名アクティビティタイプは異なる
+  - アクティビティタイプはtypes キーに指定
+      ```yml
+          on:
+            issues:
+              types: [opened, edited] # 作成時と編集時 (省略も可能でその場合は、あらゆるアクティビティにおいて実行される)
+      ```
+  - pull_requestイベントだけは少し挙動が異なり、省略すると、`types: [opened, synchronize, reopened]`と等価になる 

@@ -1,0 +1,31 @@
+name: Fomat Md 
+on: push
+  push:
+    paths:
+      - 'README.md'
+  workflow_dispatch:
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+      - name: Run Prettier 
+        run: npx prettier --write README.md
+      - name: Check for changes and commit
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          
+          # 変更があるか確認
+          if ! git diff --exit-code README.md; then
+            git add README.md
+            git commit -m "style: format README.md via Prettier [skip ci]"
+            git push
+          else
+            echo "No changes detected. Skipping commit."
+          fi
