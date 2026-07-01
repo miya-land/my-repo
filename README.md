@@ -25,21 +25,21 @@
 - 単一ワークフローでのみ使いたい変数 → 環境変数
 - 複数のワークフローで同じ値を使いたい。機密情報ではない → Variables (Settings → Secrets and Variables から登録)
 - 複数のワークフローで同じ値を使いたい。機密情報である → Secrets (Settings → Secrets and Variables から登録)
-  - run: echo "${PASSWORD:0:1} ${PASSWORD#?}" みたいなログにsecretsを表示させるのは絶対にやめる
+    - run: echo "${PASSWORD:0:1} ${PASSWORD#?}" みたいなログにsecretsを表示させるのは絶対にやめる
 
 ### 4
 
 - 式で利用できるリテラル
-  - null, boolean, number, string
+    - null, boolean, number, string
 - 使える式
-  - 論理演算、比較演算、グルーピング、インデックス、プロパティデリファンス
+    - 論理演算、比較演算、グルーピング、インデックス、プロパティデリファンス
 - 注意
-  - 型が異なる値同士の比較演算は、勝手に値が変換されるので極力を型を揃えて比較する
-  - リテラルを単体でしか使わなければ、ymlの使用箇所で直接書き、複数箇所で使う場合は環境変数として定義する
-  - runの中で式を使う場合は、環境変数に入れてから使う
-    - 式の空白や特殊文字でシェルがバグる原因に
-    - 特に外部からの入力値を参照するケースでインジェクション防御になる
-      ダメな例
+    - 型が異なる値同士の比較演算は、勝手に値が変換されるので極力を型を揃えて比較する
+    - リテラルを単体でしか使わなければ、ymlの使用箇所で直接書き、複数箇所で使う場合は環境変数として定義する
+    - runの中で式を使う場合は、環境変数に入れてから使う
+        - 式の空白や特殊文字でシェルがバグる原因に
+        - 特に外部からの入力値を参照するケースでインジェクション防御になる
+          ダメな例
 
 ```yml
 run: echo "Hello ${{ github.event.inputs.name }}"
@@ -50,84 +50,84 @@ run: echo "Hello ${{ github.event.inputs.name }}"
 ```yml
 # 安全な書き方
 env:
-  USER_NAME: ${{ github.event.inputs.name }} # 式を安全に環境変数に入れる
+    USER_NAME: ${{ github.event.inputs.name }} # 式を安全に環境変数に入れる
 run: echo "Hello $USER_NAME" # シェルの変数として安全に呼び出す
 ```
 
 ### 5
 
 - ステータスチェック関数
-  - success() : 手前の処理が成功したらtrue
-  - failure() : 手前の処理が失敗したらtrue
-  - cancelled() : 手前の処理がキャンセルされたらtrue
-  - alwarys() : 手前の処理結果に問わず常にtrue
+    - success() : 手前の処理が成功したらtrue
+    - failure() : 手前の処理が失敗したらtrue
+    - cancelled() : 手前の処理がキャンセルされたらtrue
+    - alwarys() : 手前の処理結果に問わず常にtrue
 - 使い所
-  - 失敗時のみ通知するというような処理でfailure()が使える
+    - 失敗時のみ通知するというような処理でfailure()が使える
 
 ### 6
 
 - ステップ間のデータ共有
-  - run: で GITHUB_OUTPUT環境変数に入れる
+    - run: で GITHUB_OUTPUT環境変数に入れる
 
 ### 7
 
 - GitHub APIの実行 (ghコマンドのようなGithub CLI)
-  - プルリクエストのコメントやラベル付与などができる
+    - プルリクエストのコメントやラベル付与などができる
 - 実行するには認証が必要
-  - GIHUB_TOKEN というクレデンシャルを使う
+    - GIHUB_TOKEN というクレデンシャルを使う
 - GITHUB_TOKEN は特別なクレデンシャル
-  - ワークフロー開始時に自動生成され、終了すると自動で破棄される
-  - 有効期限はワークフローの実行中のみ
-  - ${{ secrets.GITHUB_TOKEN }} で取得可能、もしくは、${{ github.token }} でも取得可能
-  - 取得したtokenは、環境変数に入れてGitHub CLI にクレデンシャルとして認識させる
-  - 環境変数名は、GITHUB_TOKEN: もしくは、GH_TOKEN: で定義する必要がある
-    ```yml
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    ```
+    - ワークフロー開始時に自動生成され、終了すると自動で破棄される
+    - 有効期限はワークフローの実行中のみ
+    - ${{ secrets.GITHUB_TOKEN }} で取得可能、もしくは、${{ github.token }} でも取得可能
+    - 取得したtokenは、環境変数に入れてGitHub CLI にクレデンシャルとして認識させる
+    - 環境変数名は、GITHUB_TOKEN: もしくは、GH_TOKEN: で定義する必要がある
+        ```yml
+        env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        ```
 - パーミッション(Permissions)
-  - GITHUB_TOKENの権限を決める
-  - ワークフローレベルとジョブレベルで定義可能
-    ```yml
-    permissions: # GITHUB_TOKENの権限を指定
-      pull-requests: write # プルリクエストの書き込みを許可
-      contents: read # ソースコードの読み込みを許可
-    ```
-  - スコープ一覧
-    - actions, pull-requests, contents, issues, checksなど
-  - アクセス
-    - read, write, none
-  - 注意
-    - ワークフロー実行リポジトリ以外のアクセスは許可されない
-    - read-all, write-allで一括で設定できるがおすすめはしない
-    - permissions: を明示的に指定しない場合、ソースコードの読み込みは暗黙的に許可される
-      - しかし、permissions: になにかしらの設定が記述されると上記は無効化される。
-      - パーミッション記述時は、ソースコードの読み込みにも明示的な許可が必要
-  - 補足
-    - git コマンド: actions/checkout が必要。ファイルをruns-on環境にダウンロードしないといけないから。ファイルに対しての操作コマンドなので、GH_TOKENの環境変数は不要
-    - gh コマンド: GH_TOKENが必要。ファイルに対してではなく、GitHubのシステム(API)に直接命令を出すため、トークンの設定が必要。actions/checkoutは不要
+    - GITHUB_TOKENの権限を決める
+    - ワークフローレベルとジョブレベルで定義可能
+        ```yml
+        permissions: # GITHUB_TOKENの権限を指定
+            pull-requests: write # プルリクエストの書き込みを許可
+            contents: read # ソースコードの読み込みを許可
+        ```
+    - スコープ一覧
+        - actions, pull-requests, contents, issues, checksなど
+    - アクセス
+        - read, write, none
+    - 注意
+        - ワークフロー実行リポジトリ以外のアクセスは許可されない
+        - read-all, write-allで一括で設定できるがおすすめはしない
+        - permissions: を明示的に指定しない場合、ソースコードの読み込みは暗黙的に許可される
+            - しかし、permissions: になにかしらの設定が記述されると上記は無効化される。
+            - パーミッション記述時は、ソースコードの読み込みにも明示的な許可が必要
+    - 補足
+        - git コマンド: actions/checkout が必要。ファイルをruns-on環境にダウンロードしないといけないから。ファイルに対しての操作コマンドなので、GH_TOKENの環境変数は不要
+        - gh コマンド: GH_TOKENが必要。ファイルに対してではなく、GitHubのシステム(API)に直接命令を出すため、トークンの設定が必要。actions/checkoutは不要
 
 ### 8
 
 - イベントフィルタリング
-  - 種類
-    - paths: 指定したファイルパスのみ
-    - paths-ignore: 指定したファイルパス以外
-    - branches: 指定したブランチのみ
-    - branches-ignore: 指定したブランチ以外
-    - tags: 指定したGit タグのみ
-    - tags-ignore: 指定したGitタグ以外
-  - 注意事項
-    - 通常フィルターとignoreフィルターは同時に使えない
-      - 同時に使いたい場合は、globを使う
-  - 複数指定した場合はAND条件
+    - 種類
+        - paths: 指定したファイルパスのみ
+        - paths-ignore: 指定したファイルパス以外
+        - branches: 指定したブランチのみ
+        - branches-ignore: 指定したブランチ以外
+        - tags: 指定したGit タグのみ
+        - tags-ignore: 指定したGitタグ以外
+    - 注意事項
+        - 通常フィルターとignoreフィルターは同時に使えない
+            - 同時に使いたい場合は、globを使う
+    - 複数指定した場合はAND条件
 - アクティビティタイプ
-  - イベントの種類に応じた制御が可能
-  - イベントごとに使用可能名アクティビティタイプは異なる
-  - アクティビティタイプはtypes キーに指定
-    ```yml
-    on:
-      issues:
-        types: [opened, edited] # 作成時と編集時 (省略も可能でその場合は、あらゆるアクティビティにおいて実行される)
-    ```
-  - pull_requestイベントだけは少し挙動が異なり、省略すると、`types: [opened, synchronize, reopened]`と等価になる
+    - イベントの種類に応じた制御が可能
+    - イベントごとに使用可能名アクティビティタイプは異なる
+    - アクティビティタイプはtypes キーに指定
+        ```yml
+        on:
+            issues:
+                types: [opened, edited] # 作成時と編集時 (省略も可能でその場合は、あらゆるアクティビティにおいて実行される)
+        ```
+    - pull_requestイベントだけは少し挙動が異なり、省略すると、`types: [opened, synchronize, reopened]`と等価になる
