@@ -54,3 +54,38 @@ run: echo "Hello $USER_NAME" # シェルの変数として安全に呼び出す
 ### 6
 - ステップ間のデータ共有
   - run: で GITHUB_OUTPUT環境変数に入れる
+
+### 7
+- GitHub APIの実行
+  - プルリクエストのコメントやラベル付与などができる
+- 実行するには認証が必要
+  - GIHUB_TOKEN というクレデンシャルを使う
+- GITHUB_TOKEN は特別なクレデンシャル 
+  - ワークフロー開始時に自動生成され、終了すると自動で破棄される
+  - 有効期限はワークフローの実行中のみ
+  - ${{ secrets.GITHUB_TOKEN }} で取得可能、もしくは、${{ github.token }} でも取得可能
+  - 取得したtokenは、環境変数に入れてGitHub CLI にクレデンシャルとして認識させる
+  - 環境変数名は、GITHUB_TOKEN: もしくは、GH_TOKEN: で定義する必要がある 
+    ```yml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    ```
+- パーミッション(Permissions)
+  - GITHUB_TOKENの権限を決める
+  - ワークフローレベルとジョブレベルで定義可能
+    ```yml
+        permissions:           # GITHUB_TOKENの権限を指定
+          pull-requests: write # プルリクエストの書き込みを許可
+          contents: read       # ソースコードの読み込みを許可
+    ```
+  - スコープ一覧
+    - actions, pull-requests, contents, issues, checksなど
+  - アクセス
+    - read, write, none
+  - 注意
+    - ワークフロー実行リポジトリ以外のアクセスは許可されない
+    - read-all, write-allで一括で設定できるがおすすめはしない
+    - permissions: を明示的に指定しない場合、ソースコードの読み込みは暗黙的に許可される
+      - しかし、permissions: になにかしらの設定が記述されると上記は無効化される。
+      - パーミッション記述時は、ソースコードの読み込みにも明示的な許可が必要
+
