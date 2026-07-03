@@ -170,3 +170,14 @@ concurrency:
     group: <Concurrency グループ>
     cancel-in-progress: true
 ```
+
+### 13
+- デバックログ
+    - ステップバックログ
+        - ステップのログをより詳細にする
+        - Secrets,Variablesへキー名 「ACTIONS_STEP_DEBUG」、値「true」で登録すれば有効化できる
+    - ランナー診断ログ
+        - Secrets,Variablesへキー名 「ACTIONS_RUNNER_DEBUG」、値「true」で登録すれば有効化できる
+        - ランナーの挙動が詳細に確認できるが、ブラウザからの確認はできなく、ステップページ → 歯車 → Download log archive からログアーカイブをダウンロードして参照する
+    - ワークフローコマンドを使うことで、echoコマンド経由でランナーへの特殊な操作を指示できる
+        - `run: echo "::debug::<message>"`を使うと、いつでも自分でもデバッグログを出力できる
