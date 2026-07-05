@@ -204,4 +204,29 @@ concurrency:
 
 - 複数ジョブの逐次実行
     - needs: キーに依存するjob(完了を待つ必要があるjob)を列挙しておくと、そのjobの完了を待つようになる
+
 ### 16
+
+- ジョブ間のデータ共有
+    - 渡す方のjob
+        - outputs: キーに、渡したい値を指定する
+        -   1. ステップにidキーを設定
+        -   2. ステップ内でGITHUB_OUTPUT環境変数へ値を書き出す
+        -   3. 出力値をジョブのoutputsキーへstepsコンテキスト経由でセット
+    - 受け取る方のjob
+        - needs: キーでジョブの依存関係を定義
+        - needsコンテキストを経由し、環境変数へセットして参照する
+        - `${{ needs.<job_id>.outputs.<output_name> }}`
+
+### 17
+
+- Environments
+    - 用途
+        - Environments variables → 環境ごとに管理するVariable (※環境変数ではない)
+        - Environments secrets → 環境ごとに管理するSecrets
+    - 設定方法
+        - Settings → Environments → New environment → Name に Environments名(testing,stating,productionなど)を入力 → Configure environment
+        - Environments 設定ページ → variables と secrets を 設定
+    - 使い方
+        - environment: キーを使い、ジョブレベルへ以下の構文で指定する
+        - `environment: <environment-name>`
